@@ -1,16 +1,18 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { AspectRatio } from "@/components/ui/aspect-ratio"
-import { CreditCard, Download, Mail, Smartphone, QrCode, Shield, Calendar, Phone, Copy, Check, Wifi } from 'lucide-react'
+import { CreditCard, Download, Mail, Smartphone, QrCode, Shield, Calendar, Phone, Copy, Check, Wifi, RotateCcw, Printer } from 'lucide-react'
 
 export default function CardPage() {
   const [copied, setCopied] = useState(false)
   const [flipped, setFlipped] = useState(false)
+  const [qrOpen, setQrOpen] = useState(false)
+  const cardRef = useRef<HTMLDivElement>(null)
   const [profile, setProfile] = useState<{
     user: any
     insuranceProfile: any
@@ -29,15 +31,15 @@ export default function CardPage() {
   }, [])
 
   const cardData = profile?.insuranceProfile ?? {
-    memberName: "",
-    memberId: "",
-    groupNumber: "",
-    policyNumber: "",
-    planName: "",
-    effectiveDate: "",
-    expirationDate: "",
-    issueDate: "",
-    cardType: "",
+    memberName: "John Doe",
+    memberId: "MBR-1024-9988",
+    groupNumber: "GRP-321",
+    policyNumber: "PLCY-7788-5544",
+    planName: "Premium Member",
+    effectiveDate: "2024-01-01",
+    expirationDate: "2024-12-31",
+    issueDate: "2024-01-02",
+    cardType: "Digital",
   }
 
   // Build QR from fetched profile
@@ -72,6 +74,10 @@ export default function CardPage() {
     setTimeout(() => setCopied(false), 1500)
   }
 
+  function printCard() {
+    window.print()
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -79,22 +85,24 @@ export default function CardPage() {
           <h1 className="text-3xl font-bold">My Insurance Card</h1>
           <p className="text-muted-foreground">Access and manage your insurance identification card</p>
         </div>
-        <Badge variant="default" className="text-sm">
-          <Shield className="w-4 h-4 mr-1" />
-          Active
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge variant="default" className="text-sm">
+            <Shield className="w-4 h-4 mr-1" />
+            Active
+          </Badge>
+          <Button size="sm" variant="outline" onClick={() => setFlipped(false)} aria-label="Show front">
+            <RotateCcw className="h-4 w-4 mr-1" /> Reset
+          </Button>
+          <Button size="sm" variant="outline" onClick={printCard} aria-label="Print card">
+            <Printer className="h-4 w-4 mr-1" /> Print
+          </Button>
+        </div>
       </div>
 
       {/* Interactive flip credit card (front/back) */}
       <div className="flex justify-center">
-        <div className="w-full max-w-md [perspective:1200px]">
+        <div className="w-full max-w-md [perspective:1200px]" ref={cardRef}>
           <AspectRatio ratio={85.6/53.98}>
-            <button
-              type="button"
-              onClick={() => setCopied((v: boolean) => v)}
-              className="sr-only"
-              aria-hidden
-            />
             <div
               onClick={() => setFlipped((f: boolean) => !f)}
               className="relative h-full w-full cursor-pointer [transform-style:preserve-3d] transition-transform duration-700 ease-in-out"
@@ -118,7 +126,12 @@ export default function CardPage() {
                 <div className="mt-3 grid grid-cols-2 gap-3 text-xs font-mono">
                   <div>
                     <div className="text-[10px] uppercase text-emerald-100">Member ID</div>
-                    <div>{cardData.memberId}</div>
+                    <div className="flex items-center gap-1">
+                      <span>{cardData.memberId}</span>
+                      <Button size="icon" variant="ghost" className="h-5 w-5" onClick={(e)=>{e.stopPropagation(); copyToClipboard(cardData.memberId)}} aria-label="Copy member ID">
+                        {copied ? <Check className="h-3 w-3"/> : <Copy className="h-3 w-3"/>}
+                      </Button>
+                    </div>
                   </div>
                   <div>
                     <div className="text-[10px] uppercase text-emerald-100">Policy</div>
@@ -147,58 +160,50 @@ export default function CardPage() {
                     <div className="font-mono truncate">{cardData.policyNumber}</div>
                   </div>
                 </div>
-                <div className="absolute bottom-5 right-5 rounded-md bg-white p-3 shadow-md">
-                  <img
-                    src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${qrData}`}
-                    alt="Verification QR code"
-                    className="h-24 w-24 md:h-28 md:w-28"
-                  />
-                </div>
+                <button onClick={(e)=>{ e.stopPropagation(); setQrOpen(true) }} className="absolute bottom-5 right-5 rounded-md bg-white p-3 shadow-md" aria-label="Open QR code">
+                  <img src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${qrData}`} alt="Verification QR code" className="h-24 w-24 md:h-28 md:w-28" />
+                </button>
               </div>
             </div>
           </AspectRatio>
         </div>
       </div>
 
+      {/* QR Dialog */}
+      <Dialog open={qrOpen} onOpenChange={setQrOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Card QR Code</DialogTitle>
+            <DialogDescription>Show this at the provider to verify your membership</DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center p-3">
+            <img src={`https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=${qrData}`} alt="Insurance QR" className="h-72 w-72" />
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={()=>setQrOpen(false)}>Close</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
 
-      {/* Colorful analytics/action tiles */}
+
+      {/* Action tiles */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="border-0 bg-gradient-to-br from-indigo-500 via-sky-500 to-cyan-400 text-white">
-          <CardContent className="h-20 flex items-center justify-between">
-            <div>
-              <div className="text-xs/5 opacity-90">Downloads</div>
-              <div className="text-lg font-semibold">Card PDF</div>
-            </div>
-            <Download className="w-6 h-6" />
-          </CardContent>
-        </Card>
-        <Card className="border-0 bg-gradient-to-br from-fuchsia-500 via-pink-500 to-rose-400 text-white">
-          <CardContent className="h-20 flex items-center justify-between">
-            <div>
-              <div className="text-xs/5 opacity-90">Share</div>
-              <div className="text-lg font-semibold">Email Card</div>
-            </div>
-            <Mail className="w-6 h-6" />
-          </CardContent>
-        </Card>
-        <Card className="border-0 bg-gradient-to-br from-emerald-500 via-teal-500 to-lime-400 text-white">
-          <CardContent className="h-20 flex items-center justify-between">
-            <div>
-              <div className="text-xs/5 opacity-90">Request</div>
-              <div className="text-lg font-semibold">Physical Card</div>
-            </div>
-            <CreditCard className="w-6 h-6" />
-          </CardContent>
-        </Card>
-        <Card className="border-0 bg-gradient-to-br from-amber-500 via-orange-500 to-red-400 text-white">
-          <CardContent className="h-20 flex items-center justify-between">
-            <div>
-              <div className="text-xs/5 opacity-90">Access</div>
-              <div className="text-lg font-semibold">Show QR</div>
-            </div>
-            <QrCode className="w-6 h-6" />
-          </CardContent>
-        </Card>
+        <Button className="h-20 flex-col gap-1" variant="outline" onClick={printCard}>
+          <Download className="w-5 h-5" />
+          Download/Print Card
+        </Button>
+        <Button className="h-20 flex-col gap-1" variant="outline" onClick={()=>{ window.location.href = `mailto:?subject=My Insurance Card&body=Member ID: ${cardData.memberId}%0APolicy: ${cardData.policyNumber}` }}>
+          <Mail className="w-5 h-5" />
+          Email Card
+        </Button>
+        <Button className="h-20 flex-col gap-1" variant="outline" onClick={()=>alert("Request submitted. A physical card will be mailed to your address on file.") }>
+          <CreditCard className="w-5 h-5" />
+          Request Physical Card
+        </Button>
+        <Button className="h-20 flex-col gap-1" variant="outline" onClick={()=>setQrOpen(true)}>
+          <QrCode className="w-5 h-5" />
+          Show Large QR
+        </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

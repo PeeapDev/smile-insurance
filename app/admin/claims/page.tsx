@@ -30,6 +30,8 @@ import {
   Send,
 } from "lucide-react"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { useRouter } from "next/navigation"
+import { ROUTES } from "@/lib/routes"
 
 const claimsData = [
   {
@@ -137,6 +139,7 @@ const getPriorityColor = (priority: string) => {
 }
 
 export default function ClaimsProcessingPage() {
+  const router = useRouter()
   const [selectedClaim, setSelectedClaim] = useState<any>(null)
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
@@ -173,7 +176,7 @@ export default function ClaimsProcessingPage() {
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={() => router.push(ROUTES.admin.memberCreate.replace("/members/create", "/claims/submit"))}>
             <FileText className="h-4 w-4 mr-2" />
             New Claim
           </Button>

@@ -72,7 +72,7 @@ const DEFAULTS: Record<RoleKey, PermissionMap> = {
   },
   staff: {
     dashboard: { read: true, write: false, del: false },
-    members: { read: false, write: false, del: false },
+    members: { read: true, write: true, del: false },
     companies: { read: false, write: false, del: false },
     claims: { read: true, write: false, del: false },
     inventory: { read: false, write: false, del: false },
