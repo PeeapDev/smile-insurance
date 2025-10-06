@@ -29,9 +29,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { ShieldCheck, ShieldAlert, AlertTriangle as AlertBadge, CheckCircle2 } from "lucide-react"
 // User icon no longer needed after dialog removal
 
-import { companiesData } from "@/lib/demo/companies"
-const companiesLocal = companiesData
+import { loadCompanies } from "@/lib/services/companies"
 import { useToast } from "@/components/ui/use-toast"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { ROUTES } from "@/lib/routes"
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -66,6 +68,13 @@ export default function CompaniesPage() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [industryFilter, setIndustryFilter] = useState("all")
   const { toast } = useToast()
+  const router = useRouter()
+  const [companiesLocal, setCompaniesLocal] = useState(loadCompanies())
+
+  useEffect(() => {
+    // refresh from storage when page mounts
+    setCompaniesLocal(loadCompanies())
+  }, [])
 
   const filteredCompanies = companiesLocal.filter((company) => {
     const matchesSearch =
@@ -99,7 +108,7 @@ export default function CompaniesPage() {
             <Building className="h-4 w-4 mr-2" />
             Export Data
           </Button>
-          <Button size="sm">
+          <Button size="sm" onClick={()=>router.push(ROUTES.admin.companiesCreate)}>
             <Plus className="h-4 w-4 mr-2" />
             Add Company
           </Button>

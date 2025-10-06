@@ -9,85 +9,45 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "@/hooks/use-toast"
 import { ScanLine, Search, Plus } from "lucide-react"
+import { can, currentRole } from "@/lib/rbac"
+import { membersFind } from "@/lib/demo-members"
+import { parseScanned as parseScannedUrl, useQrScanner } from "@/hooks/use-qr-scanner"
+import { useRouter } from "next/navigation"
+import { ROUTES } from "@/lib/routes"
 
-function parseScanned(url: string) {
-  try {
-    const a = document.createElement("a")
-    a.href = url
-    const parts = a.pathname.split("/").filter(Boolean)
-    const [verify, type, id] = parts
-    if (verify !== "verify" || !type || !id) return null
-    return { type, id }
-  } catch {
-    return null
-  }
-}
+function parseScanned(url: string) { return parseScannedUrl(url) }
 
 export function StaffOtcQuick() {
   const [open, setOpen] = useState(false)
   const [profile, setProfile] = useState<{ type: string; id: string; name: string; status: string } | null>(null)
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const [cameraReady, setCameraReady] = useState(false)
-  const [usingDetector, setUsingDetector] = useState(false)
+  const { videoRef, canvasRef, start, stop, detectorType, cameraReady } = useQrScanner()
+  const [tab, setTab] = useState<"scan" | "search">("scan")
+  const role = typeof window !== "undefined" ? currentRole() : "user"
+  const router = useRouter()
 
-  function stopCamera() {
-    const stream = videoRef.current?.srcObject as MediaStream | undefined
-    stream?.getTracks().forEach((t) => t.stop())
-    if (videoRef.current) videoRef.current.srcObject = null
-    setCameraReady(false)
-  }
+  function stopCamera() { stop() }
 
   useEffect(() => {
-    if (!open) {
-      stopCamera()
-      setProfile(null)
-    }
+    if (!open) { stopCamera(); setProfile(null) }
   }, [open])
 
+  useEffect(() => { return () => { stopCamera() } }, [])
+
   async function startScan() {
-    try {
-      // @ts-ignore
-      const supported = "BarcodeDetector" in window
-      setUsingDetector(!!supported)
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: false })
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream
-        await videoRef.current.play()
-        setCameraReady(true)
-      }
-      if (supported) loopDetect()
-    } catch (e) {
-      toast({ title: "Camera error", description: "Unable to access camera. Check permissions." })
-    }
+    try { await start(handleDecodedRaw) } catch { toast({ title: "Camera error", description: "Unable to access camera. Check permissions." }) }
   }
 
-  async function loopDetect() {
-    // @ts-ignore
-    const detector = new window.BarcodeDetector({ formats: ["qr_code"] })
-    const el = videoRef.current
-    if (!el) return
-    const tick = async () => {
-      if (!open) return
-      try {
-        // @ts-ignore
-        const bitmap = await createImageBitmap(el)
-        const codes = await detector.detect(bitmap)
-        if (codes && codes.length > 0) {
-          const raw = codes[0].rawValue as string
-          const parsed = parseScanned(raw)
-          if (parsed) {
-            // Demo: fabricate profile info
-            const name = parsed.type === "policy" ? "TechCorp Policy" : parsed.type === "user" ? "John Doe" : `Staff ${parsed.id}`
-            const status = parsed.type === "policy" ? "ACTIVE" : "VERIFIED"
-            setProfile({ ...parsed, name, status })
-          } else {
-            toast({ title: "Invalid QR", description: "Unrecognized QR format" })
-          }
-        }
-      } catch {}
-      requestAnimationFrame(tick)
+  // detection loop handled inside useQrScanner()
+
+  function handleDecodedRaw(raw: string) {
+    const parsed = parseScanned(raw)
+    if (parsed) {
+      const name = parsed.type === "policy" ? "TechCorp Policy" : parsed.type === "user" ? "John Doe" : `Staff ${parsed.id}`
+      const status = parsed.type === "policy" ? "ACTIVE" : "VERIFIED"
+      setProfile({ ...parsed, name, status })
+    } else {
+      toast({ title: "Invalid QR", description: "Unrecognized QR format" })
     }
-    requestAnimationFrame(tick)
   }
 
   function handleSearch(ev: React.FormEvent<HTMLFormElement>) {
@@ -95,8 +55,12 @@ export function StaffOtcQuick() {
     const form = new FormData(ev.currentTarget)
     const q = String(form.get("q") || "").trim()
     if (!q) return
-    // Demo: return a fake profile
-    setProfile({ type: "user", id: "u-1001", name: q || "Sarah Johnson", status: "ACTIVE" })
+    const m = membersFind(q)
+    if (m) {
+      setProfile({ type: "user", id: m.id, name: m.name, status: m.status || "ACTIVE" })
+    } else {
+      toast({ title: "No match", description: "No user found by that ID, email, or name" })
+    }
   }
 
   return (
@@ -111,12 +75,23 @@ export function StaffOtcQuick() {
           <DialogTitle>Over the Counter</DialogTitle>
         </DialogHeader>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-          <Button variant="secondary" onClick={() => (window.location.href = "/staff/visitors")}>Manage Visitor</Button>
-          <Button variant="secondary" onClick={() => (window.location.href = "/admin/members/create")}>New User</Button>
-          <Button variant="secondary" onClick={() => (window.location.href = "/staff/enquiries/new")}>New Enquiry</Button>
-          <Button variant="secondary" onClick={() => document.getElementById("otc-search-tab")?.click()}>Search</Button>
+          <Button variant="secondary" onClick={() => router.push(ROUTES.staff.visitors)}>Manage Visitor</Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              if (can("members", "write", role)) {
+                router.push(ROUTES.staff.memberCreate)
+              } else {
+                toast({ title: "Permission required", description: "You do not have access to create users." })
+              }
+            }}
+          >
+            New User
+          </Button>
+          <Button variant="secondary" onClick={() => router.push(ROUTES.staff.enquiryNew)}>New Enquiry</Button>
+          <Button variant="secondary" onClick={() => setTab("search")}>Search</Button>
         </div>
-        <Tabs defaultValue="scan" className="space-y-4">
+        <Tabs value={tab} onValueChange={(v)=>setTab(v as any)} className="space-y-4">
           <TabsList>
             <TabsTrigger value="scan">Scan Card</TabsTrigger>
             <TabsTrigger id="otc-search-tab" value="search">Search User</TabsTrigger>
@@ -126,13 +101,23 @@ export function StaffOtcQuick() {
               <div className="space-y-3">
                 <div className="relative w-full aspect-[16/9] bg-black overflow-hidden rounded-md min-h-[320px]">
                   <video ref={videoRef} className="w-full h-full object-cover" playsInline muted />
+                  {/* hidden canvas used for jsQR fallback */}
+                  <canvas ref={canvasRef} className="hidden" />
                   {!cameraReady && (
                     <div className="absolute inset-0 grid place-items-center text-white">
                       <Button variant="secondary" onClick={startScan}>Start Camera</Button>
                     </div>
                   )}
                 </div>
-                <div className="text-sm text-muted-foreground">Detector: {usingDetector ? <Badge>BarcodeDetector</Badge> : <Badge variant="outline">Not Supported</Badge>}</div>
+                <div className="text-sm text-muted-foreground">
+                  Detector: {detectorType === "barcode" ? (
+                    <Badge>BarcodeDetector</Badge>
+                  ) : detectorType === "jsqr" ? (
+                    <Badge variant="secondary">jsQR Fallback</Badge>
+                  ) : (
+                    <Badge variant="outline">Not Supported</Badge>
+                  )}
+                </div>
               </div>
               <div>
                 <Card>

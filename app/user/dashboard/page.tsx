@@ -7,8 +7,11 @@ import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Shield, CreditCard, FileText, Users, DollarSign, Calendar, Phone, Mail, Activity } from "lucide-react"
 import { ChatWidget } from "@/components/chat-widget"
+import { useRouter } from "next/navigation"
+import { ROUTES } from "@/lib/routes"
 
 export default function UserDashboard() {
+  const router = useRouter()
   const deductibleProgress = 65 // 65% of deductible met
 
   return (
@@ -77,19 +80,19 @@ export default function UserDashboard() {
             <CardDescription>Common tasks and services</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
-            <Button className="h-20 flex-col gap-2 bg-transparent" variant="outline">
+            <Button className="h-20 flex-col gap-2 bg-transparent" variant="outline" onClick={()=>router.push(ROUTES.user.card)}>
               <CreditCard className="h-6 w-6" />
               View Insurance Card
             </Button>
-            <Button className="h-20 flex-col gap-2 bg-transparent" variant="outline">
+            <Button className="h-20 flex-col gap-2 bg-transparent" variant="outline" onClick={()=>router.push(ROUTES.user.claimSubmit)}>
               <FileText className="h-6 w-6" />
               File a Claim
             </Button>
-            <Button className="h-20 flex-col gap-2 bg-transparent" variant="outline">
+            <Button className="h-20 flex-col gap-2 bg-transparent" variant="outline" onClick={()=>router.push(ROUTES.user.family)}>
               <Users className="h-6 w-6" />
               Manage Family
             </Button>
-            <Button className="h-20 flex-col gap-2 bg-transparent" variant="outline">
+            <Button className="h-20 flex-col gap-2 bg-transparent" variant="outline" onClick={()=>router.push(ROUTES.user.payments)}>
               <DollarSign className="h-6 w-6" />
               Make Payment
             </Button>
