@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 
 export default function StaffPaymentsPage() {
   return (
-    <FeatureGate feature="staff.payments">
+    <FeatureGate feature="staff.payments" resource="payments">
       <div className="p-6 space-y-4">
         <h1 className="text-2xl font-bold">Payments</h1>
         <p className="text-sm text-muted-foreground">Process and view payments.</p>

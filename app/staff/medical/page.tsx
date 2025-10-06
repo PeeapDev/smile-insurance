@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/ca
 
 export default function StaffMedicalPage() {
   return (
-    <FeatureGate feature="staff.medical">
+    <FeatureGate feature="staff.medical" resource="otc">
       <div className="p-0">
         <div className="px-6 pt-6">
           <Card className="border-0 shadow-none">

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 
 export default function StaffCompaniesPage() {
   return (
-    <FeatureGate feature="staff.companies">
+    <FeatureGate feature="staff.companies" resource="companies">
       <div className="p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Companies</h1>

@@ -44,7 +44,7 @@ export default function StaffInsuranceCardCreatePage() {
   }
 
   return (
-    <FeatureGate feature="staff.insurance_cards">
+    <FeatureGate feature="staff.insurance_cards" resource="members">
       <div className="p-6 space-y-6">
         <div>
           <h1 className="text-2xl font-bold">Create Insurance Card</h1>

@@ -8,7 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 
 export default function StaffMembersPage() {
   return (
-    <FeatureGate feature="staff.members">
+    <FeatureGate feature="staff.members" resource="members">
       <div className="p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold">Members</h1>

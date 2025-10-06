@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/ca
 
 export default function StaffClaimSubmitPage() {
   return (
-    <FeatureGate feature="staff.claims">
+    <FeatureGate feature="staff.claims" resource="claims">
       <div className="p-0">
         <div className="px-6 pt-6">
           <Card className="border-0 shadow-none">

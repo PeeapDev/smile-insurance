@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/ca
 
 export default function StaffMotorPage() {
   return (
-    <FeatureGate feature="staff.motor">
+    <FeatureGate feature="staff.motor" resource="otc">
       <div className="p-0">
         {/* Minimal header to indicate staff context */}
         <div className="px-6 pt-6">

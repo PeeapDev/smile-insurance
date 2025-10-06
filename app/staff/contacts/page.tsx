@@ -14,7 +14,7 @@ const KEY = "staff:contacts:list"
 
 export default function StaffContactsPage() {
   return (
-    <FeatureGate feature="staff.contacts">
+    <FeatureGate feature="staff.contacts" resource="members">
       <ContactsInner />
     </FeatureGate>
   )
