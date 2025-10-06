@@ -1,0 +1,810 @@
+/\`\`\`
+"use client"
+
+import { useState } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Switch } from "@/components/ui/switch"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { User, MapPin, Shield, Bell, Lock, Camera, Save, Phone } from 'lucide-react'
+
+export default function ProfilePage() {
+const [isEditing, setIsEditing] = useState(false)
+const [avatarUrl, setAvatarUrl] = useState("/placeholder.svg?height=64&width=64")
+const [profileData, setProfileData] = useState({
+  firstName: "John",
+  lastName: "Smith",
+  email: "john.smith@email.com",
+  phone: "(555) 123-4567",
+  dateOfBirth: "1985-06-15",
+  address: "123 Main Street",
+  city: "New York",
+  state: "NY",
+  zipCode: "10001",
+  emergencyContact: "Jane Smith",
+  emergencyPhone: "(555) 987-6543",
+  relationship: "Spouse",
+  about: "Focused on proactive healthcare and healthy living.",
+  language: "en",
+  timezone: "America/New_York",
+})
+
+function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  const { id, value } = e.target
+  setProfileData(prev => ({ ...prev, [id]: value }))
+}
+
+function handleSelect(id: string, value: string) {
+  setProfileData(prev => ({ ...prev, [id]: value }))
+}
+
+function handleSave() {
+  // Persist via server action or API in a follow-up step.
+  setIsEditing(false)
+}
+
+function onUploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
+  const file = e.target.files?.[0]
+  if (!file) return
+  const url = URL.createObjectURL(file)
+  setAvatarUrl(url)
+}
+
+return (
+  <div className="space-y-6">
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-3xl font-bold">My Profile</h1>
+        <p className="text-muted-foreground">Manage your personal information, security, and preferences</p>
+      </div>
+      <div className="flex items-center gap-2">
+        <Badge variant="outline">
+          <Shield className="w-4 h-4 mr-1" />
+          Verified Member
+        </Badge>
+        {!isEditing ? (
+          <Button onClick={() => setIsEditing(true)}>Edit Profile</Button>
+        ) : (
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setIsEditing(false)}>Cancel</Button>
+            <Button onClick={handleSave}>
+              <Save className="w-4 h-4 mr-2" />
+              Save Changes
+            </Button>
+          </div>
+        )}
+      </div>
+    </div>
+
+    <Card>
+      <CardContent className="p-6">
+        <div className="flex items-center gap-4">
+          <Avatar className="h-16 w-16">
+            <AvatarImage src={avatarUrl || "/placeholder.svg"} alt="User photo" />
+            <AvatarFallback>JS</AvatarFallback>
+          </Avatar>
+          <div>
+            <p className="font-semibold">{profileData.firstName} {profileData.lastName}</p>
+            <p className="text-sm text-muted-foreground">{profileData.email}</p>
+          </div>
+          <div className="ml-auto">
+            <input id="avatar-upload" type="file" accept="image/*" className="hidden" onChange={onUploadAvatar} />
+            <Button variant="outline" onClick={() => document.getElementById("avatar-upload")?.click()}>
+              <Camera className="w-4 h-4 mr-2" />
+              Change Photo
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+
+    <Tabs defaultValue="overview" className="w-full">
+      <TabsList className="grid w-full grid-cols-5">
+        <TabsTrigger value="overview">Overview</TabsTrigger>
+        <TabsTrigger value="personal">Personal</TabsTrigger>
+        <TabsTrigger value="contact">Contact</TabsTrigger>
+        <TabsTrigger value="security">Security</TabsTrigger>
+        <TabsTrigger value="preferences">Preferences</TabsTrigger>
+      </TabsList>
+
+      <TabsContent value="overview">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <User className="w-5 h-5" />
+                Personal Info
+              </CardTitle>
+              <CardDescription>Your core member details</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">First name</p>
+                <p className="font-medium">{profileData.firstName}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Last name</p>
+                <p className="font-medium">{profileData.lastName}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Date of birth</p>
+                <p className="font-medium">{profileData.dateOfBirth}</p>
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Language</p>
+                <p className="font-medium">English</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="w-5 h-5" />
+                Contact & Address
+              </CardTitle>
+              <CardDescription>How we reach you</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Phone</span>
+                <span className="font-medium">{profileData.phone}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Email</span>
+                <span className="font-medium">{profileData.email}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Address</span>
+                <span className="font-medium text-right">{profileData.address}, {profileData.city}, {profileData.state} {profileData.zipCode}</span>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </TabsContent>
+
+      <TabsContent value="personal">
+        <Card>
+          <CardHeader>
+            <CardTitle>Personal Information</CardTitle>
+            <CardDescription>Update your name and key details</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="firstName">First Name</Label>
+              <Input id="firstName" value={profileData.firstName} disabled={!isEditing} onChange={handleChange} />
+            </div>
+            <div>
+              <Label htmlFor="lastName">Last Name</Label>
+              <Input id="lastName" value={profileData.lastName} disabled={!isEditing} onChange={handleChange} />
+            </div>
+            <div>
+              <Label htmlFor="dateOfBirth">Date of Birth</Label>
+              <Input id="dateOfBirth" type="date" value={profileData.dateOfBirth} disabled={!isEditing} onChange={handleChange} />
+            </div>
+            <div className="md:col-span-3">
+              <Label htmlFor="about">About</Label>
+              <Textarea id="about" value={profileData.about} disabled={!isEditing} onChange={handleChange} rows={3} />
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="contact">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Phone className="w-5 h-5" />
+                Contact Details
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <Label htmlFor="email">Email</Label>
+                <Input id="email" type="email" value={profileData.email} disabled={!isEditing} onChange={handleChange} />
+              </div>
+              <div className="col-span-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input id="phone" value={profileData.phone} disabled={!isEditing} onChange={handleChange} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <MapPin className="w-5 h-5" />
+                Address
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-4">
+              <div className="col-span-2">
+                <Label htmlFor="address">Street Address</Label>
+                <Input id="address" value={profileData.address} disabled={!isEditing} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="city">City</Label>
+                <Input id="city" value={profileData.city} disabled={!isEditing} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="state">State</Label>
+                <Input id="state" value={profileData.state} disabled={!isEditing} onChange={handleChange} />
+              </div>
+              <div className="col-span-2">
+                <Label htmlFor="zipCode">ZIP Code</Label>
+                <Input id="zipCode" value={profileData.zipCode} disabled={!isEditing} onChange={handleChange} />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="lg:col-span-2">
+            <CardHeader>
+              <CardTitle>Emergency Contact</CardTitle>
+              <CardDescription>Who should we contact in an emergency?</CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="emergencyContact">Full Name</Label>
+                <Input id="emergencyContact" value={profileData.emergencyContact} disabled={!isEditing} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="emergencyPhone">Phone</Label>
+                <Input id="emergencyPhone" value={profileData.emergencyPhone} disabled={!isEditing} onChange={handleChange} />
+              </div>
+              <div>
+                <Label htmlFor="relationship">Relationship</Label>
+                <Select value={profileData.relationship} onValueChange={(v) => handleSelect("relationship", v)} disabled={!isEditing}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select relationship" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Spouse">Spouse</SelectItem>
+                    <SelectItem value="Parent">Parent</SelectItem>
+                    <SelectItem value="Sibling">Sibling</SelectItem>
+                    <SelectItem value="Friend">Friend</SelectItem>
+                    <SelectItem value="Other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </TabsContent>
+
+      <TabsContent value="security">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Lock className="w-5 h-5" />
+              Security Settings
+            </CardTitle>
+            <CardDescription>Manage authentication and notifications</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="current-password">Current Password</Label>
+                <Input id="current-password" type="password" placeholder="••••••••" disabled={!isEditing} />
+              </div>
+              <div>
+                <Label htmlFor="new-password">New Password</Label>
+                <Input id="new-password" type="password" placeholder="••••••••" disabled={!isEditing} />
+              </div>
+              <div>
+                <Label htmlFor="confirm-password">Confirm New Password</Label>
+                <Input id="confirm-password" type="password" placeholder="••••••••" disabled={!isEditing} />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="font-medium">Two-Factor Authentication</p>
+                <p className="text-sm text-muted-foreground">Add an extra layer of security to your account</p>
+              </div>
+              <Switch defaultChecked disabled={!isEditing} />
+            </div>
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value="preferences">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Bell className="w-5 h-5" />
+              Preferences
+            </CardTitle>
+            <CardDescription>Communication and localization</CardDescription>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">Email Notifications</p>
+                  <p className="text-sm text-muted-foreground">Receive updates about claims and billing</p>
+                </div>
+                <Switch defaultChecked />
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-medium">SMS Notifications</p>
+                  <p className="text-sm text-muted-foreground">Text alerts for important activity</p>
+                </div>
+                <Switch />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <Label>Language</Label>
+                <Select value={profileData.language} onValueChange={(v) => handleSelect("language", v)} disabled={!isEditing}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select language" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="en">English</SelectItem>
+                    <SelectItem value="es">Español</SelectItem>
+                    <SelectItem value="fr">Français</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Time Zone</Label>
+                <Select value={profileData.timezone} onValueChange={(v) => handleSelect("timezone", v)} disabled={!isEditing}>
+                  <SelectTrigger className="mt-1">
+                    <SelectValue placeholder="Select timezone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="America/New_York">America/New_York</SelectItem>
+                    <SelectItem value="America/Chicago">America/Chicago</SelectItem>
+                    <SelectItem value="America/Denver">America/Denver</SelectItem>
+                    <SelectItem value="America/Los_Angeles">America/Los_Angeles</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+)
+}
+\`\`\`
+
+\`\`\`
+"use client"
+
+import { useState } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import { MessageSquare, Send, Search, Plus, Reply, Archive, Trash2, Building2, Shield, CreditCard, FileText, AlertCircle, CheckCircle } from 'lucide-react'
+
+export default function CompanyMessagesPage() {
+const [searchTerm, setSearchTerm] = useState("")
+const [selectedMessage, setSelectedMessage] = useState<number | null>(null)
+
+const messages = [
+  {
+    id: 1,
+    subject: "Policy Renewal Reminder - Corporate Health Plus",
+    from: "Account Manager",
+    date: "2024-01-15",
+    time: "3:45 PM",
+    status: "unread",
+    priority: "high",
+    category: "Policy Management",
+    preview: "Your company policy is due for renewal on December 31, 2024...",
+    content:
+      "Dear TechCorp Team,\n\nThis is a reminder that your Corporate Health Plus policy (CORP-2024-001) is scheduled for renewal on December 31, 2024.\n\nCurrent Policy Details:\n- 25 eligible employees\n- 23 currently enrolled\n- Monthly premium: $7,475\n- Annual premium: $89,700\n\nRenewal Options:\n1) Continue with current plan\n2) Upgrade to Premium Corporate Plus\n3) Adjust coverage levels\n\nTo discuss your renewal options, please contact your dedicated account manager or schedule a consultation.\n\nBest regards,\nSmile Insurance Account Management Team",
+  },
+  {
+    id: 2,
+    subject: "New Employee Enrollment - Sarah Johnson",
+    from: "Enrollment Services",
+    date: "2024-01-12",
+    time: "10:30 AM",
+    status: "read",
+    priority: "normal",
+    category: "Enrollment",
+    preview: "Enrollment was completed successfully for Sarah Johnson...",
+    content:
+      "Hello,\n\nWe have successfully enrolled Sarah Johnson to your company plan (Premium Health Plus) effective January 15, 2024.\n\nEmployee details:\n- Department: Engineering\n- Coverage: Premium Health Plus\n\nNo further action is required.\n\nRegards,\nEnrollment Services",
+  },
+  {
+    id: 3,
+    subject: "Monthly Invoice Available - January 2024",
+    from: "Billing Department",
+    date: "2024-01-01",
+    time: "08:00 AM",
+    status: "read",
+    priority: "normal",
+    category: "Billing",
+    preview: "Your company invoice for January is now available for download...",
+    content:
+      "Hello Finance Team,\n\nYour monthly invoice for January 2024 is ready.\n\nInvoice Details:\n- Amount: $7,475.00\n- Due Date: February 1, 2024\n- Covered Employees: 23\n\nYou can download this from the Billing section.\n\nRegards,\nBilling Department",
+  },
+  {
+    id: 4,
+    subject: "Claim Escalation - CLM-2024-002 (Michael Chen)",
+    from: "Claims Department",
+    date: "2024-01-11",
+    time: "1:05 PM",
+    status: "unread",
+    priority: "high",
+    category: "Claims",
+    preview: "A claim has been escalated and requires attention...",
+    content:
+      "Hello,\n\nClaim CLM-2024-002 for Michael Chen has been escalated for review due to missing documentation from the provider. We will update you within 2 business days.\n\nRegards,\nClaims Department",
+  },
+]
+
+const filtered = messages.filter(
+  (m) =>
+    m.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    m.from.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    m.category.toLowerCase().includes(searchTerm.toLowerCase())
+)
+
+const getStatusColor = (status: string) => (status === "unread" ? "default" : "secondary")
+const getPriorityColor = (priority: string) => (priority === "high" ? "destructive" : "secondary")
+const getStatusIcon = (status: string) => (status === "unread" ? AlertCircle : CheckCircle)
+
+return (
+  <div className="space-y-6">
+    <div className="flex items-center justify-between">
+      <div>
+        <h1 className="text-3xl font-bold">Company Messages</h1>
+        <p className="text-muted-foreground">Communicate with Smile Insurance teams</p>
+      </div>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button>
+            <Plus className="w-4 h-4 mr-2" />
+            New Message
+          </Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Send New Message</DialogTitle>
+            <DialogDescription>Contact the right department</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="dept">Department</Label>
+              <Select>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select department" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="account">Account Manager</SelectItem>
+                  <SelectItem value="claims">Claims Department</SelectItem>
+                  <SelectItem value="billing">Billing Department</SelectItem>
+                  <SelectItem value="enrollment">Enrollment Services</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="subject">Subject</Label>
+              <Input id="subject" placeholder="Enter message subject" />
+            </div>
+            <div>
+              <Label htmlFor="body">Message</Label>
+              <Textarea id="body" rows={4} placeholder="Type your message..." />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline">Cancel</Button>
+              <Button>
+                <Send className="w-4 h-4 mr-2" />
+                Send
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="w-5 h-5 text-neutral-700" />
+            <div>
+              <p className="text-2xl font-bold">{messages.length}</p>
+              <p className="text-sm text-muted-foreground">Total</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2">
+            <Shield className="w-5 h-5 text-emerald-700" />
+            <div>
+              <p className="text-2xl font-bold">2</p>
+              <p className="text-sm text-muted-foreground">High Priority</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2">
+            <CreditCard className="w-5 h-5 text-purple-700" />
+            <div>
+              <p className="text-2xl font-bold">Billing</p>
+              <p className="text-sm text-muted-foreground">1 recent</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-2">
+            <Building2 className="w-5 h-5 text-blue-700" />
+            <div>
+              <p className="text-2xl font-bold">Policy</p>
+              <p className="text-sm text-muted-foreground">1 renewal</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+
+    <Card>
+      <CardContent className="p-4">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input
+            placeholder="Search by subject, sender, or category..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </CardContent>
+    </Card>
+
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Inbox</CardTitle>
+          <CardDescription>Company correspondence</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {filtered.map((m) => {
+              const StatusIcon = getStatusIcon(m.status)
+              return (
+                <div
+                  key={m.id}
+                  className={`p-4 border rounded-lg cursor-pointer transition-colors hover:bg-muted/50 ${
+                    selectedMessage === m.id ? "bg-muted/50 border-primary" : ""
+                  } ${m.status === "unread" ? "bg-neutral-50/50" : ""}`}
+                  onClick={() => setSelectedMessage(m.id)}
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <StatusIcon className={`w-4 h-4 ${m.status === "unread" ? "text-neutral-900" : "text-emerald-700"}`} />
+                      <h4 className={`font-medium ${m.status === "unread" ? "font-semibold" : ""}`}>{m.subject}</h4>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={getPriorityColor(m.priority)} className="text-xs">{m.priority}</Badge>
+                      <Badge variant="outline" className="text-xs">{m.category}</Badge>
+                    </div>
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-2">{m.from}</p>
+                  <p className="text-sm text-muted-foreground line-clamp-2">{m.preview}</p>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-xs text-muted-foreground">{m.date} at {m.time}</span>
+                    <Badge variant={getStatusColor(m.status)} className="text-xs">{m.status}</Badge>
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Message Details</CardTitle>
+          <CardDescription>{selectedMessage ? "View content" : "Select a message to view details"}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {selectedMessage ? (
+            (() => {
+              const m = messages.find(x => x.id === selectedMessage)
+              if (!m) return null
+              return (
+                <div className="space-y-4">
+                  <div className="border-b pb-4">
+                    <h3 className="text-lg font-semibold mb-2">{m.subject}</h3>
+                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                      <span>From: {m.from}</span>
+                      <span>{m.date} at {m.time}</span>
+                    </div>
+                    <div className="flex gap-2 mt-2">
+                      <Badge variant={getPriorityColor(m.priority)} className="text-xs">{m.priority} priority</Badge>
+                      <Badge variant="outline" className="text-xs">{m.category}</Badge>
+                    </div>
+                  </div>
+
+                  <pre className="whitespace-pre-wrap font-sans text-sm leading-relaxed">{m.content}</pre>
+
+                  <div className="flex gap-2 pt-4 border-t">
+                    <Button size="sm">
+                      <Reply className="w-4 h-4 mr-2" />
+                      Reply
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Archive className="w-4 h-4 mr-2" />
+                      Archive
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Delete
+                    </Button>
+                  </div>
+                </div>
+              )
+            })()
+          ) : (
+            <div className="text-center py-12">
+              <MessageSquare className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <p className="text-muted-foreground">Select a message to view its content</p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  </div>
+)
+}
+\`\`\`
+
+\`\`\`
+import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+
+export default function Loading() {
+return (
+  <div className="p-6 space-y-4">
+    <div className="flex gap-4">
+      <Skeleton className="h-10 w-40" />
+      <Skeleton className="h-10 w-24" />
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <Card key={i}><CardContent className="p-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+      ))}
+    </div>
+    {Array.from({ length: 3 }).map((_, i) => (
+      <Card key={i}><CardContent className="p-6 space-y-3">
+        <Skeleton className="h-5 w-1/3" />
+        <Skeleton className="h-4 w-1/2" />
+        <Skeleton className="h-2 w-full" />
+      </CardContent></Card>
+    ))}
+  </div>
+)
+}
+\`\`\`
+
+\`\`\`
+import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+
+export default function Loading() {
+return (
+  <div className="p-6 space-y-4">
+    <Skeleton className="h-10 w-64" />
+    <Card>
+      <CardContent className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+        {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+      </CardContent>
+    </Card>
+    {Array.from({ length: 4 }).map((_, i) => (
+      <Card key={i}><CardContent className="p-6 space-y-3">
+        <Skeleton className="h-6 w-2/3" />
+        <Skeleton className="h-4 w-1/2" />
+        <Skeleton className="h-16 w-full" />
+      </CardContent></Card>
+    ))}
+  </div>
+)
+}
+\`\`\`
+
+\`\`\`
+import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+
+export default function Loading() {
+return (
+  <div className="p-6 space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Card key={i}><CardContent className="p-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+      ))}
+    </div>
+    <Card><CardContent className="p-4"><Skeleton className="h-10 w-full" /></CardContent></Card>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Card><CardContent className="p-6 space-y-3">
+        {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}
+      </CardContent></Card>
+      <Card><CardContent className="p-6 space-y-3">
+        <Skeleton className="h-6 w-2/3" />
+        <Skeleton className="h-4 w-1/2" />
+        <Skeleton className="h-40 w-full" />
+      </CardContent></Card>
+    </div>
+  </div>
+)
+}
+\`\`\`
+
+\`\`\`
+import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+
+export default function Loading() {
+return (
+  <div className="p-6 space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Card key={i}><CardContent className="p-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+      ))}
+    </div>
+    <Card><CardContent className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+      {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+    </CardContent></Card>
+    {Array.from({ length: 5 }).map((_, i) => (
+      <Card key={i}><CardContent className="p-6 space-y-3">
+        <Skeleton className="h-6 w-2/3" />
+        <Skeleton className="h-4 w-1/2" />
+      </CardContent></Card>
+    ))}
+  </div>
+)
+}
+\`\`\`
+
+\`\`\`
+import { Card, CardContent } from "@/components/ui/card"
+import { Skeleton } from "@/components/ui/skeleton"
+
+export default function Loading() {
+return (
+  <div className="p-6 space-y-4">
+    <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+      {Array.from({ length: 6 }).map((_, i) => (
+        <Card key={i}><CardContent className="p-4"><Skeleton className="h-16 w-full" /></CardContent></Card>
+      ))}
+    </div>
+    <Card><CardContent className="p-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+      {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
+    </CardContent></Card>
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <Card className="lg:col-span-2"><CardContent className="p-6 space-y-3">
+        {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-20 w-full" />)}
+      </CardContent></Card>
+      <Card><CardContent className="p-6 space-y-3">
+        {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-14 w-full" />)}
+      </CardContent></Card>
+    </div>
+  </div>
+)
+}
+\`\`\`
