@@ -29,3 +29,6 @@ dist/
 
 # Misc
 *.log
+
+# Ignore local Electron desktop app
+desktop/
