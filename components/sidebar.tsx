@@ -49,7 +49,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import type { ComponentType } from "react"
 import { useEffect, useState } from "react"
-import { can, currentRole } from "@/lib/rbac"
+import { can } from "@/lib/rbac"
+import { isEnabled } from "@/lib/feature-flags"
 
 interface SidebarProps {
   userRole: "admin" | "user" | "company" | "staff"
@@ -75,6 +76,28 @@ export function Sidebar({ userRole }: SidebarProps) {
     isActive: boolean
     subItems?: NavSubItem[]
     badge?: number
+  }
+
+  // map route to feature flag key (for staff)
+  function routeToFeature(href: string): string | null {
+    if (href === "/staff/dashboard") return null
+    if (href.includes("/staff/members")) return "staff.members"
+    if (href.includes("/staff/insurance-cards")) return "staff.insurance_cards"
+    if (href.includes("/staff/claims")) return "staff.claims"
+    if (href.includes("/staff/underwriting")) return "staff.underwriting"
+    if (href.includes("/staff/payments")) return "staff.payments"
+    if (href.includes("/staff/chat")) return "staff.chat"
+    if (href.includes("/staff/contacts")) return "staff.contacts"
+    if (href.includes("/staff/invoices")) return "staff.invoices"
+    if (href.includes("/staff/files")) return "staff.files"
+    if (href.includes("/staff/companies")) return "staff.companies"
+    if (href.includes("/staff/hr")) return "staff.hr"
+    if (href.includes("/staff/inventory")) return "staff.inventory"
+    if (href.includes("/staff/reports")) return "staff.reports"
+    if (href.includes("/staff/settings")) return "staff.settings"
+    if (href.includes("/staff/motor")) return "staff.motor"
+    if (href.includes("/staff/medical")) return "staff.medical"
+    return null
   }
 
   const userNavigation: NavigationItem[] = [
@@ -131,45 +154,99 @@ export function Sidebar({ userRole }: SidebarProps) {
   ]
 
   const staffNavigation: NavigationItem[] = [
+    { title: "Dashboard", href: "/staff/dashboard", icon: Home, isActive: pathname === "/staff/dashboard" },
+    { title: "Motor", href: "/staff/motor", icon: Car, isActive: pathname === "/staff/motor" },
+    { title: "Medical", href: "/staff/medical", icon: Stethoscope, isActive: pathname === "/staff/medical" },
     {
-      title: "Dashboard",
-      href: "/staff/dashboard",
-      icon: Home,
-      isActive: pathname === "/staff/dashboard",
-    },
-    {
-      title: "My Staff Card",
-      href: "/staff/card",
-      icon: CreditCard,
-      isActive: pathname === "/staff/card",
-    },
-    {
-      title: "Attendance Scan",
-      href: "/staff/attendance/scan",
-      icon: Briefcase,
-      isActive: pathname === "/staff/attendance/scan",
-    },
-    {
-      title: "Underwriting",
-      href: "/staff/underwriting/workqueue",
-      icon: FileText,
-      isActive: pathname.startsWith("/staff/underwriting"),
+      title: "Members",
+      href: "/staff/members",
+      icon: Users,
+      isActive: pathname.startsWith("/staff/members"),
       subItems: [
-        { title: "My Workqueue", href: "/staff/underwriting/workqueue" },
+        { title: "View All", href: "/staff/members" },
+        { title: "Add New", href: "/staff/members/create" },
       ],
     },
     {
-      title: "Chat",
-      href: "/staff/chat",
-      icon: MessageSquare,
-      isActive: pathname.startsWith("/staff/chat"),
+      title: "Insurance Cards",
+      href: "/staff/insurance-cards",
+      icon: CreditCard,
+      isActive: pathname.startsWith("/staff/insurance-cards"),
+      subItems: [
+        { title: "Manage All", href: "/staff/insurance-cards" },
+        { title: "Create New", href: "/staff/insurance-cards/create" },
+      ],
     },
     {
-      title: "Settings",
-      href: "/staff/settings",
-      icon: Settings,
-      isActive: pathname === "/staff/settings",
+      title: "Claims Processing",
+      href: "/staff/claims",
+      icon: FileText,
+      isActive: pathname.startsWith("/staff/claims"),
+      subItems: [
+        { title: "View All", href: "/staff/claims" },
+        { title: "Submit New", href: "/staff/claims/submit" },
+      ],
     },
+    {
+      title: "Underwriting",
+      href: "/staff/underwriting",
+      icon: FileText,
+      isActive: pathname.startsWith("/staff/underwriting"),
+      subItems: [
+        { title: "Overview", href: "/staff/underwriting" },
+        { title: "Rules", href: "/staff/underwriting/rules" },
+      ],
+    },
+    { title: "Payments", href: "/staff/payments", icon: DollarSign, isActive: pathname === "/staff/payments" },
+    { title: "Chat", href: "/staff/chat", icon: MessageSquare, isActive: pathname.startsWith("/staff/chat") },
+    { title: "Contacts", href: "/staff/contacts", icon: Users, isActive: pathname.startsWith("/staff/contacts") },
+    {
+      title: "Invoices",
+      href: "/staff/invoices",
+      icon: FileText,
+      isActive: pathname.startsWith("/staff/invoices"),
+      subItems: [
+        { title: "All Invoices", href: "/staff/invoices" },
+        { title: "New Invoice / Quote", href: "/staff/invoices/new" },
+      ],
+    },
+    { title: "Files", href: "/staff/files", icon: Package, isActive: pathname.startsWith("/staff/files") },
+    { title: "Companies", href: "/staff/companies", icon: Building, isActive: pathname === "/staff/companies" },
+    {
+      title: "HR",
+      href: "/staff/hr",
+      icon: Briefcase,
+      isActive: pathname.startsWith("/staff/hr"),
+      subItems: [
+        { title: "Overview", href: "/staff/hr" },
+        { title: "Staff", href: "/staff/hr/staff" },
+        { title: "Attendance", href: "/staff/hr/attendance" },
+        { title: "Attendance Scan", href: "/staff/hr/attendance/scan" },
+        { title: "Payroll", href: "/staff/hr/payroll" },
+        { title: "Finance", href: "/staff/hr/finance" },
+      ],
+    },
+    {
+      title: "Inventory",
+      href: "/staff/inventory",
+      icon: Package,
+      isActive: pathname.startsWith("/staff/inventory"),
+      subItems: [
+        { title: "Overview", href: "/staff/inventory" },
+        { title: "Items", href: "/staff/inventory/items" },
+      ],
+    },
+    {
+      title: "Reports",
+      href: "/staff/reports",
+      icon: BarChart,
+      isActive: pathname.startsWith("/staff/reports"),
+      subItems: [
+        { title: "Overview", href: "/staff/reports" },
+        { title: "Attendance Reports", href: "/staff/reports/attendance" },
+      ],
+    },
+    { title: "Settings", href: "/staff/settings", icon: Settings, isActive: pathname === "/staff/settings" },
   ]
 
   const adminNavigation: NavigationItem[] = [
@@ -416,7 +493,15 @@ export function Sidebar({ userRole }: SidebarProps) {
           <SidebarGroupContent>
             <SidebarMenu>
               {navigation
-                .filter((item) => !hydrated || can(routeToResource(item.href), "read", userRole))
+                .filter((item) => {
+                  if (!hydrated) return true
+                  const hasPerm = can(routeToResource(item.href), "read", userRole)
+                  if (userRole === "staff") {
+                    const fk = routeToFeature(item.href)
+                    return hasPerm && (fk ? isEnabled(fk as any) : true)
+                  }
+                  return hasPerm
+                })
                 .map((item) => (
                 <SidebarMenuItem key={item.title}>
                   {item.subItems ? (
