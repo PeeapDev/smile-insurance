@@ -22,10 +22,10 @@ import { toast } from "@/hooks/use-toast"
 
 export default function CompanyMotorPoliciesPage() {
   const router = useRouter()
-  const params = useParams() as { company?: string }
-  const company = params?.company || "company"
+  const params = useParams() as { org?: string }
+  const org = params?.org || "company"
 
-  const storageKey = useMemo(() => `motorPolicies:${company}`, [company])
+  const storageKey = useMemo(() => `motorPolicies:${org}`, [org])
   const [policies, setPolicies] = useState<MotorPolicy[]>([])
 
   useEffect(() => {
@@ -55,11 +55,11 @@ export default function CompanyMotorPoliciesPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Car className="h-6 w-6" />
-          <h1 className="text-2xl font-bold capitalize">{company} Motor Insurance</h1>
+          <h1 className="text-2xl font-bold capitalize">{org} Motor Insurance</h1>
         </div>
         <div className="flex items-center gap-3">
           <Badge variant="outline">Policies: {policies.length}</Badge>
-          <Button className="gap-2" onClick={() => router.push(`/${company}/motor/new`)}>
+          <Button className="gap-2" onClick={() => router.push(`/${org}/motor/new`)}>
             <Plus className="h-4 w-4"/> New Policy
           </Button>
         </div>
@@ -96,8 +96,8 @@ export default function CompanyMotorPoliciesPage() {
                       <td className="py-2 pr-4">${p.premium}</td>
                       <td className="py-2 text-right">
                         <div className="flex justify-end gap-2">
-                          <Button asChild variant="outline" size="sm"><Link href={`/${company}/motor/${p.id}`}>View</Link></Button>
-                          <Button asChild variant="secondary" size="sm"><Link href={`/${company}/motor/${p.id}/edit`}>Edit</Link></Button>
+                          <Button asChild variant="outline" size="sm"><Link href={`/${org}/motor/${p.id}`}>View</Link></Button>
+                          <Button asChild variant="secondary" size="sm"><Link href={`/${org}/motor/${p.id}/edit`}>Edit</Link></Button>
                           <Button variant="destructive" size="icon" onClick={()=>removePolicy(p.id)} aria-label="Delete">
                             <Trash2 className="h-4 w-4" />
                           </Button>

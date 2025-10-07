@@ -21,12 +21,12 @@ import { toast } from "@/hooks/use-toast"
  }
 
 export default function EditCompanyMotorPolicyPage() {
-  const params = useParams() as { id?: string, company?: string }
+  const params = useParams() as { id?: string, org?: string }
   const router = useRouter()
   const id = params?.id || ""
-  const company = params?.company || "company"
+  const org = params?.org || "company"
 
-  const storageKey = useMemo(() => `motorPolicies:${company}`, [company])
+  const storageKey = useMemo(() => `motorPolicies:${org}`, [org])
 
   const [loaded, setLoaded] = useState(false)
   const [vehicleMake, setVehicleMake] = useState("")
@@ -53,7 +53,7 @@ export default function EditCompanyMotorPolicyPage() {
       const found = list.find(p => p.id === id)
       if (!found) {
         toast({ title: "Not found", description: "Policy does not exist.", variant: "destructive" })
-        router.push(`/${company}/motor`)
+        router.push(`/${org}/motor`)
         return
       }
       setVehicleMake(found.vehicleMake)
@@ -65,9 +65,9 @@ export default function EditCompanyMotorPolicyPage() {
       setLoaded(true)
     } catch {
       toast({ title: "Error", description: "Could not load policy.", variant: "destructive" })
-      router.push(`/${company}/motor`)
+      router.push(`/${org}/motor`)
     }
-  }, [id, storageKey, company, router])
+  }, [id, storageKey, org, router])
 
   useEffect(() => { if (id) load() }, [id, load])
 
@@ -107,7 +107,7 @@ export default function EditCompanyMotorPolicyPage() {
     }
 
     toast({ title: "Policy updated", description: `${vehicleYear} ${vehicleMake} ${vehicleModel}` })
-    router.push(`/${company}/motor/${id}`)
+    router.push(`/${org}/motor/${id}`)
   }
 
   if (!loaded) return null
@@ -117,9 +117,9 @@ export default function EditCompanyMotorPolicyPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Car className="h-6 w-6" />
-          <h1 className="text-2xl font-bold capitalize">Edit Motor Policy – {company}</h1>
+          <h1 className="text-2xl font-bold capitalize">Edit Motor Policy – {org}</h1>
         </div>
-        <Button variant="outline" onClick={() => router.push(`/${company}/motor/${id}`)}><ArrowLeft className="h-4 w-4 mr-2"/>Back</Button>
+        <Button variant="outline" onClick={() => router.push(`/${org}/motor/${id}`)}><ArrowLeft className="h-4 w-4 mr-2"/>Back</Button>
       </div>
 
       <Card>

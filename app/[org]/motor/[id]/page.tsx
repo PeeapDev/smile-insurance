@@ -21,12 +21,12 @@ import { toast } from "@/hooks/use-toast"
  }
 
 export default function ViewCompanyMotorPolicyPage() {
-  const params = useParams() as { id?: string, company?: string }
+  const params = useParams() as { id?: string, org?: string }
   const router = useRouter()
   const id = params?.id || ""
-  const company = params?.company || "company"
+  const org = params?.org || "company"
 
-  const storageKey = useMemo(() => `motorPolicies:${company}`, [company])
+  const storageKey = useMemo(() => `motorPolicies:${org}`, [org])
   const [policy, setPolicy] = useState<MotorPolicy | null>(null)
 
   const load = useMemo(() => () => {
@@ -50,12 +50,12 @@ export default function ViewCompanyMotorPolicyPage() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Car className="h-6 w-6" />
-          <h1 className="text-2xl font-bold capitalize">{company} Motor Policy Details</h1>
+          <h1 className="text-2xl font-bold capitalize">{org} Motor Policy Details</h1>
         </div>
         <div className="flex items-center gap-2">
-          <Button asChild variant="outline"><Link href={`/${company}/motor`}><ArrowLeft className="h-4 w-4 mr-2"/>Back</Link></Button>
+          <Button asChild variant="outline"><Link href={`/${org}/motor`}><ArrowLeft className="h-4 w-4 mr-2"/>Back</Link></Button>
           {policy && (
-            <Button asChild><Link href={`/${company}/motor/${policy.id}/edit`}><Pencil className="h-4 w-4 mr-2"/> Edit</Link></Button>
+            <Button asChild><Link href={`/${org}/motor/${policy.id}/edit`}><Pencil className="h-4 w-4 mr-2"/> Edit</Link></Button>
           )}
         </div>
       </div>

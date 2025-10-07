@@ -11,10 +11,10 @@ import { toast } from "@/hooks/use-toast"
 
 export default function NewCompanyMotorPolicyPage() {
   const router = useRouter()
-  const params = useParams() as { company?: string }
-  const company = params?.company || "company"
+  const params = useParams() as { org?: string }
+  const org = params?.org || "company"
 
-  const storageKey = useMemo(() => `motorPolicies:${company}`, [company])
+  const storageKey = useMemo(() => `motorPolicies:${org}`, [org])
 
   const [vehicleMake, setVehicleMake] = useState("")
   const [vehicleModel, setVehicleModel] = useState("")
@@ -71,14 +71,14 @@ export default function NewCompanyMotorPolicyPage() {
     }
 
     toast({ title: "Policy created", description: `${vehicleYear} ${vehicleMake} ${vehicleModel} – ${coverage}` })
-    router.push(`/${company}/motor`)
+    router.push(`/${org}/motor`)
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
         <Car className="h-6 w-6" />
-        <h1 className="text-2xl font-bold capitalize">New Motor Policy – {company}</h1>
+        <h1 className="text-2xl font-bold capitalize">New Motor Policy – {org}</h1>
       </div>
       <Card>
         <CardHeader>
