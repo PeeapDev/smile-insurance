@@ -52,8 +52,8 @@ function slugify(s: string) {
 
 function deriveUsername(name: string, company?: string) {
   const first = (name || "").split(" ")[0] || "user"
-  const org = company ? slugify(company).replace(/-/g, "") : "smile"
-  return `${first.toLowerCase()}@${org || "smile"}`
+  const companySlug = company ? slugify(company).replace(/-/g, "") : "smile"
+  return `${first.toLowerCase()}@${companySlug || "smile"}`
 }
 
 function resolveUsername(email: string, name: string, company?: string) {

@@ -37,35 +37,24 @@ services:
   # Next.js Web Application
   web:
     build:
-      context: .
-      dockerfile: Dockerfile
     container_name: smile-web
     restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-smile}:${POSTGRES_PASSWORD:-smile_secure_password}@postgres:5432/${POSTGRES_DB:-smile_insurance}
+      - REDIS_URL=redis://redis:6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-redis_secure_password}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET:-your_nextauth_secret_here}
+      - NEXTAUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
+    ports:
+      - "3000:3000"
+    volumes:
+      - uploads_data:/app/uploads
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
-    environment:
-      # Database
-      DATABASE_URL: postgresql://${POSTGRES_USER:-smile}:${POSTGRES_PASSWORD:-smile_secure_password}@postgres:5432/${POSTGRES_DB:-smile_insurance}
-      
-      # Redis
-      REDIS_URL: redis://:${REDIS_PASSWORD:-smile_redis_password}@redis:6379
-      
-      # NextAuth
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-change_this_to_a_random_secret_in_production}
-      
-      # App Config
-      NODE_ENV: production
-      
-      # Desktop sync endpoint (internal)
-      SMILE_SYNC_USERS_URL: http://web:3000/api/desktop/users
-    ports:
-      - "${WEB_PORT:-3000}:3000"
-    volumes:
-      - uploads:/app/uploads
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/api/health"]
       interval: 30s
@@ -89,7 +78,6 @@ services:
       - nginx_cache:/var/cache/nginx
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health"]
-      interval: 30s
       timeout: 10s
       retries: 3
 
@@ -98,7 +86,7 @@ volumes:
     driver: local
   redis_data:
     driver: local
-  uploads:
+  uploads_data:
     driver: local
   nginx_cache:
     driver: local
